@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-ENTRY_TEXT = "My smartwatch buzzes 'Nice job standing up!' as I walk over to plug it in."
+ENTRY_TEXT = "My map app reroutes 40,000 drivers onto my street to dodge the jam its last reroute created."
 OUTPUT_ENV = "MAKEFUN_OUTPUT_DIR"
 DEFAULT_OUTPUT_DIR = "/output"
 
