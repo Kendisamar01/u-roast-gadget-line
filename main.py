@@ -5,7 +5,7 @@ OUTPUT_ENV = "MAKEFUN_OUTPUT_DIR"
 DEFAULT_OUTPUT_DIR = "/output"
 ENTRY_FILENAME = "entry.txt"
 
-ENTRY_LINE = "My calendar app booked a 'quick sync' over my lunch and suggested I eat at 3:15."
+ENTRY_LINE = "My calendar put a 'quick sync' over lunch, then offered to move my sandwich to 3:15."
 
 
 def entry_directory():
