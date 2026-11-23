@@ -1,79 +1,53 @@
-from dataclasses import dataclass
+from typing import NamedTuple
 
 
-@dataclass(frozen=True)
-class Candidate:
+class Candidate(NamedTuple):
     text: str
     target: str
-    scores: tuple[int, int, int, int, int]
-    note: str
-
-    @property
-    def total(self):
-        return sum(self.scores)
+    reason: str
 
 
 CANDIDATES = (
     Candidate(
-        "My map app reroutes 40,000 drivers onto my street to dodge the jam its last reroute created.",
-        "map app",
-        (5, 5, 5, 5, 5),
-        "Sharper: the app's own reroute made the jam; 40,000 drivers and my street make it specific.",
+        "My calendar app booked a 'quick sync' over my lunch and suggested I eat at 3:15.",
+        "calendar app",
+        "Turns a daily app's jargon into a tiny workplace absurdity; concrete 3:15 detail.",
     ),
     Candidate(
-        "My weather app demands precise location just to confirm it's raining on my head.",
-        "weather app",
-        (5, 4, 4, 5, 4),
-        "Permission-dialog recognition, but the location joke is a familiar angle.",
+        "My e-reader says four minutes left in the chapter, then adds a footnote with its own footnote.",
+        "e-reader",
+        "Recursive footnote feels like a specific betrayal while reading in bed.",
     ),
     Candidate(
-        "My password manager generates a 40-character password, then expects me to type it into the TV with a remote.",
-        "password manager",
-        (5, 4, 4, 4, 5),
-        "Concrete device mismatch, though slightly long for a one-liner.",
+        "My earbuds pause when I nod at a coworker, then resume the exact second I start telling a story.",
+        "earbuds",
+        "Gesture misinterpretation with a neat timing sting.",
     ),
     Candidate(
-        "My router calls it a 'quick update,' then makes the Wi-Fi a philosophical concept for 20 minutes.",
-        "router",
-        (5, 4, 5, 4, 4),
-        "Fresh wording for an update outage, but the target is less personal.",
+        "My phone's screen-time report scolds me for five hours of scrolling; I check it from the same app.",
+        "phone",
+        "Self-defeating loop, though the app angle is fairly familiar.",
     ),
     Candidate(
-        "My smartwatch buzzes 'Nice job standing up!' as I walk over to plug it in.",
-        "smartwatch",
-        (5, 4, 4, 5, 4),
-        "Tight and relatable; the fitness-nag angle has been done more often.",
-    ),
-    Candidate(
-        "My smart doorbell marks the delivery driver as 'family' and my family as 'suspicious activity.'",
-        "smart doorbell",
-        (5, 4, 4, 4, 4),
-        "Good misclassification sting; daily use is slightly less universal.",
-    ),
-    Candidate(
-        "My microwave's 'one-touch' button needs two touches: one to wake it, one to ask if I meant it.",
-        "microwave",
-        (5, 4, 3, 4, 4),
-        "Irony lands, but the double-tap complaint is a common one.",
-    ),
-    Candidate(
-        "My laptop's fan spins up when I open a spreadsheet, as if it just remembered it has a family to feed.",
+        "My laptop fan waits until I'm on mute, then revs like it finally has the floor.",
         "laptop",
-        (5, 3, 3, 4, 4),
-        "Neat image, but a loud laptop fan is the obvious complaint.",
+        "Short personification with a clear everyday moment.",
     ),
     Candidate(
-        "My printer's low-ink warning arrives in full color, nine pages early.",
-        "printer",
-        (4, 4, 3, 5, 4),
-        "Very tight, but printer jokes are well worn and printing is less than daily.",
+        "My smart speaker confidently plays the wrong album and calls it 'a new favorite.'",
+        "smart speaker",
+        "Funny mislabeling, but less daily than a phone or calendar.",
     ),
     Candidate(
-        "My smart TV asks if I'm still there during the ad, then recommends a recap of the show I'm watching.",
-        "smart TV",
-        (5, 4, 4, 4, 4),
-        "Specific behavior with a nice loop, but not as fresh as the map angle.",
+        "My microwave clock has read 12:00 since 2019; it survived every power cut except the one that mattered.",
+        "microwave",
+        "Concrete detail and a dry twist, slightly long for a one-liner.",
+    ),
+    Candidate(
+        "My alarm clock's gentle sunrise wakes me with all the warmth of a fluorescent hospital corridor.",
+        "alarm clock",
+        "Fresh comparison, but the punchline is a mood rather than a behavior.",
     ),
 )
 
-SELECTED_INDEX = 0
+CHOSEN = CANDIDATES[0]

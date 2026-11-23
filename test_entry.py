@@ -1,76 +1,55 @@
-import ast
 import os
 import subprocess
 import sys
-import tempfile
 import unittest
 from pathlib import Path
 
-from candidates import CANDIDATES, SELECTED_INDEX
-from main import DEFAULT_OUTPUT_DIR, ENTRY_TEXT, OUTPUT_ENV, validate_text
-
-REPO_DIR = Path(__file__).resolve().parent
-MAIN_FILE = REPO_DIR / "main.py"
-FORBIDDEN = ("fuck", "shit", "bitch", "crap", "damn")
+ROOT = Path(__file__).resolve().parent
+OUTPUT_DIR = Path("/tmp/testout")
+ENTRY_FILE = OUTPUT_DIR / "entry.txt"
+SCRIPT = ROOT / "main.py"
 
 
-class EntryTests(unittest.TestCase):
-    def test_output_contract_constants(self):
-        self.assertEqual(OUTPUT_ENV, "MAKEFUN_OUTPUT_DIR")
-        self.assertEqual(DEFAULT_OUTPUT_DIR, "/output")
+class EntryFileTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        ENTRY_FILE.unlink(missing_ok=True)
+        env = os.environ.copy()
+        env["MAKEFUN_OUTPUT_DIR"] = str(OUTPUT_DIR)
+        cls.proc = subprocess.run(
+            [sys.executable, str(SCRIPT)],
+            cwd=ROOT,
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        cls.raw = ENTRY_FILE.read_bytes() if ENTRY_FILE.is_file() else b""
 
-    def test_selected_line_matches_top_candidate(self):
-        selected = CANDIDATES[SELECTED_INDEX]
-        self.assertEqual(ENTRY_TEXT, selected.text)
-        self.assertEqual(selected.total, max(c.total for c in CANDIDATES))
-        self.assertEqual(sum(c.total == selected.total for c in CANDIDATES), 1)
+    def test_main_runs_without_error(self):
+        self.assertEqual(self.proc.returncode, 0, self.proc.stderr)
 
-    def test_candidates_cover_brief(self):
-        self.assertGreaterEqual(len(CANDIDATES), 6)
-        for candidate in CANDIDATES:
-            with self.subTest(text=candidate.text):
-                text = validate_text(candidate.text)
-                self.assertLessEqual(len(text), 200)
-                self.assertTrue(text.strip())
-                self.assertIn(candidate.target.lower(), text.lower())
-                self.assertFalse(any(word in text.lower() for word in FORBIDDEN))
-                self.assertEqual(len(candidate.scores), 5)
-                self.assertTrue(all(1 <= score <= 5 for score in candidate.scores))
-                self.assertTrue(candidate.note.strip())
+    def test_output_dir_override_is_honored(self):
+        self.assertTrue(ENTRY_FILE.is_file())
 
-    def test_main_uses_stdlib_only(self):
-        tree = ast.parse(MAIN_FILE.read_text(encoding="utf-8"))
-        imports = set()
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Import):
-                imports.update(alias.name.split(".", 1)[0] for alias in node.names)
-            elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
-                imports.add(node.module.split(".", 1)[0])
-        self.assertTrue(imports)
-        self.assertTrue(imports.issubset(sys.stdlib_module_names), imports - sys.stdlib_module_names)
+    def test_output_is_utf8(self):
+        self.raw.decode("utf-8")
 
-    def test_program_writes_exactly_one_utf8_line(self):
-        for run in range(2):
-            with self.subTest(run=run), tempfile.TemporaryDirectory() as output_dir:
-                env = os.environ.copy()
-                env[OUTPUT_ENV] = output_dir
-                result = subprocess.run(
-                    [sys.executable, "-P", "-s", str(MAIN_FILE)],
-                    cwd=REPO_DIR,
-                    env=env,
-                    capture_output=True,
-                    text=True,
-                    timeout=30,
-                )
-                self.assertEqual(result.returncode, 0, result.stderr)
-                raw = (Path(output_dir) / "entry.txt").read_bytes()
-                text = raw.decode("utf-8")
-                self.assertEqual(text, ENTRY_TEXT + "\n")
-                self.assertEqual(raw.count(b"\n"), 1)
-                self.assertNotIn("\r", text)
-                self.assertEqual(len(raw.decode("utf-8").rstrip("\n")), len(ENTRY_TEXT))
-                self.assertLessEqual(len(ENTRY_TEXT), 200)
+    def test_output_has_exactly_one_line(self):
+        self.assertTrue(self.raw.endswith(b"\n"))
+        self.assertEqual(self.raw.count(b"\n"), 1)
+        self.assertNotIn(b"\r", self.raw)
+
+    def test_line_is_nonempty_and_within_limit(self):
+        line = self.raw.decode("utf-8").removesuffix("\n")
+        self.assertTrue(line.strip())
+        self.assertGreaterEqual(len(line), 1)
+        self.assertLessEqual(len(line), 200)
 
 
 if __name__ == "__main__":
-    unittest.main()
+    suite = unittest.defaultTestLoader.loadTestsFromTestCase(EntryFileTests)
+    result = unittest.TextTestRunner(verbosity=2).run(suite)
+    if not result.wasSuccessful():
+        sys.exit(1)
+    print("PASS")

@@ -1,36 +1,35 @@
 import os
 from pathlib import Path
 
-ENTRY_TEXT = "My map app reroutes 40,000 drivers onto my street to dodge the jam its last reroute created."
 OUTPUT_ENV = "MAKEFUN_OUTPUT_DIR"
 DEFAULT_OUTPUT_DIR = "/output"
+ENTRY_FILENAME = "entry.txt"
+
+ENTRY_LINE = "My calendar app booked a 'quick sync' over my lunch and suggested I eat at 3:15."
 
 
-def validate_text(text):
+def entry_directory():
+    override = os.environ.get(OUTPUT_ENV)
+    return Path(override if override else DEFAULT_OUTPUT_DIR)
+
+
+def checked_line(text):
     if not isinstance(text, str):
-        raise TypeError("entry text must be a string")
+        raise TypeError("entry must be text")
     if not 1 <= len(text) <= 200:
-        raise ValueError("entry text must be 1 to 200 characters")
-    if not text.strip():
-        raise ValueError("entry text must not be whitespace")
-    if "\n" in text or "\r" in text:
-        raise ValueError("entry text must be a single line")
+        raise ValueError("entry must be 1 to 200 characters")
+    if not text.strip() or any(ch in text for ch in "\n\r"):
+        raise ValueError("entry must be one non-blank line")
     return text
 
 
-def write_entry(output_dir=None):
-    text = validate_text(ENTRY_TEXT)
-    directory = output_dir if output_dir is not None else os.environ.get(OUTPUT_ENV, DEFAULT_OUTPUT_DIR)
-    target = Path(directory)
-    target.mkdir(parents=True, exist_ok=True)
-    path = target / "entry.txt"
-    path.write_bytes((text + "\n").encode("utf-8"))
-    return path
-
-
-def main():
-    write_entry()
+def write_entry():
+    target_dir = entry_directory()
+    target_dir.mkdir(parents=True, exist_ok=True)
+    destination = target_dir / ENTRY_FILENAME
+    destination.write_text(checked_line(ENTRY_LINE) + "\n", encoding="utf-8")
+    return destination
 
 
 if __name__ == "__main__":
-    main()
+    write_entry()
