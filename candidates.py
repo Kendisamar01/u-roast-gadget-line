@@ -15,10 +15,10 @@ class Candidate:
 
 CANDIDATES = (
     Candidate(
-        "My map app reroutes me around traffic it caused by telling 40,000 drivers to take my street.",
-        "map app",
+        "My smartwatch buzzes 'Nice job standing up!' as I walk over to plug it in.",
+        "smartwatch",
         (5, 5, 5, 5, 5),
-        "The app solves a jam it just created; 40,000 drivers makes the gripe specific.",
+        "Draft: recognizable nag, but the standing-up gag is a familiar smartwatch angle.",
     ),
     Candidate(
         "My weather app demands precise location just to confirm it's raining on my head.",
